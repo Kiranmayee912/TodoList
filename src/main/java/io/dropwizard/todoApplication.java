@@ -5,6 +5,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.resources.testResouce;
 import io.dropwizard.resources.TodoService;
+
 import javax.sql.DataSource;
 
 
@@ -44,7 +45,7 @@ public class todoApplication extends Application<todoConfiguration> {
         environment.jersey().register(resource);*/
 
         environment.jersey().register(new testResouce(configuration.getTemplate(),
-                configuration.getDefaultName(),dbi.onDemand(TodoService.class)));
+                configuration.getDefaultName(), dbi.onDemand(TodoService.class)));
     }
 
 }

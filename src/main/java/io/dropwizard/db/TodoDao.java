@@ -23,11 +23,11 @@ public interface TodoDao {
     @SqlUpdate("insert into todo(name, description) values(:name, :description)")
     void createTodo(@BindBean final Todo todo);
 
-    /*@SqlUpdate("update parts set name = coalesce(:name, name), code = coalesce(:code, code) where id = :id")
-    void editPart(@BindBean final Part part);
+    @SqlUpdate("update todo set name = :name, description = :description where id = :id")
+    void editTodo(@BindBean final Todo todo);
 
-    @SqlUpdate("delete from parts where id = :id")
-    int deletePart(@Bind("id") final int id);*/
+    @SqlUpdate("delete from todo where id = :id")
+    int deleteTodo(@Bind("id") final int id);
 
     @SqlQuery("select last_insert_id();")
     public int lastInsertId();

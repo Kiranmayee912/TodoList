@@ -64,4 +64,20 @@ public class testResouce {
     public TodoRepresentation<Todo> createTodo(@NotNull @Valid final Todo todo) {
         return new TodoRepresentation<Todo>(todoService.createTodo(todo));
     }
+
+    @PUT
+    @Timed
+    @Path("{id}")
+    public TodoRepresentation<Todo> editTodo(@NotNull @Valid final Todo todo,
+                                         @PathParam("id") final int id) {
+        todo.setId(id);
+        return new TodoRepresentation<Todo>(todoService.editTodo(todo));
+    }
+
+    @DELETE
+    @Timed
+    @Path("{id}")
+    public TodoRepresentation<String> deleteTodo(@PathParam("id") final int id) {
+        return new TodoRepresentation<String>(todoService.deleteTodo(id));
+    }
 }
