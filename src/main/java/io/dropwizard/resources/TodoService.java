@@ -39,11 +39,12 @@ public abstract class TodoService {
         return part;
     }
 
-    /*public Part createPart(Part part) {
-        partsDao().createPart(part);
-        return partsDao().getPart(partsDao().lastInsertId());
+    public Todo createTodo(Todo todo) {
+        todoDao().createTodo(todo);
+        return todoDao().getTodo(todoDao().lastInsertId());
     }
 
+    /*
     public Part editPart(Part part) {
         if (Objects.isNull(partsDao().getPart(part.getId()))) {
             throw new WebApplicationException(String.format(PART_NOT_FOUND, part.getId()),

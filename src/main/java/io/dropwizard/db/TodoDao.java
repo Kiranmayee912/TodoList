@@ -20,15 +20,15 @@ public interface TodoDao {
     @SqlQuery("select * from todo where id = :id")
     public Todo getTodo(@Bind("id") final int id);
 
-    /*@SqlUpdate("insert into parts(name, code) values(:name, :code)")
-    void createPart(@BindBean final Part part);
+    @SqlUpdate("insert into todo(name, description) values(:name, :description)")
+    void createTodo(@BindBean final Todo todo);
 
-    @SqlUpdate("update parts set name = coalesce(:name, name), code = coalesce(:code, code) where id = :id")
+    /*@SqlUpdate("update parts set name = coalesce(:name, name), code = coalesce(:code, code) where id = :id")
     void editPart(@BindBean final Part part);
 
     @SqlUpdate("delete from parts where id = :id")
-    int deletePart(@Bind("id") final int id);
+    int deletePart(@Bind("id") final int id);*/
 
     @SqlQuery("select last_insert_id();")
-    public int lastInsertId();*/
+    public int lastInsertId();
 }

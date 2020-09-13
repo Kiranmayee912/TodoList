@@ -58,4 +58,10 @@ public class testResouce {
     public TodoRepresentation<Todo> getTodo(@PathParam("id") final int id) {
         return new TodoRepresentation<Todo>(todoService.getTodo(id));
     }
+
+    @POST
+    @Timed
+    public TodoRepresentation<Todo> createTodo(@NotNull @Valid final Todo todo) {
+        return new TodoRepresentation<Todo>(todoService.createTodo(todo));
+    }
 }
