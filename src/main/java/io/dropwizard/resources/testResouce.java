@@ -56,7 +56,9 @@ public class testResouce {
     @Timed
     @Path("{id}")
     public TodoRepresentation<Todo> getTodo(@PathParam("id") final int id) {
-        return new TodoRepresentation<Todo>(todoService.getTodo(id));
+        TodoRepresentation<Todo> todoTodoRepresentation= new TodoRepresentation<Todo>(todoService.getTodo(id));
+        System.out.println("HERE4 "+id+" "+todoTodoRepresentation);
+        return todoTodoRepresentation;
     }
 
     @POST

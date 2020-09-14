@@ -1,9 +1,13 @@
-io\dropwizard\db\TodoMapper.class
 io\dropwizard\api\Saying.class
 io\dropwizard\db\TodoDao.class
 io\dropwizard\db\Todo.class
 io\dropwizard\resources\TodoService.class
-io\dropwizard\todoConfiguration.class
+io\dropwizard\db\TasksDao.class
 io\dropwizard\todoApplication.class
+io\dropwizard\db\Tasks.class
 io\dropwizard\api\TodoRepresentation.class
+io\dropwizard\db\TodoMapper.class
+io\dropwizard\db\TasksMapper.class
+io\dropwizard\db\TasksListMapper.class
+io\dropwizard\todoConfiguration.class
 io\dropwizard\resources\testResouce.class

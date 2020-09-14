@@ -11,30 +11,46 @@ import org.skife.jdbi.v2.exceptions.UnableToObtainConnectionException;
 import org.skife.jdbi.v2.sqlobject.CreateSqlObject;
 import com.google.common.base.Preconditions;
 
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
 import io.dropwizard.db.TodoDao;
 import io.dropwizard.db.Todo;
+import io.dropwizard.db.TasksDao;
+import io.dropwizard.db.Tasks;
 
 public abstract class TodoService {
     private static final String TODO_ID_IS_NOT_FOUND = "Todo id %s not found.";
-    private static final String TODO_NAME_CANNOT_BE_NULL = "Todo name should be empty.";
-    private static final String DATABASE_REACH_ERROR =
-            "Could not reach the MySQL database. The database may be down or there may be network connectivity issues. Details: ";
-    private static final String DATABASE_CONNECTION_ERROR =
-            "Could not create a connection to the MySQL database. The database configurations are likely incorrect. Details: ";
-    private static final String DATABASE_UNEXPECTED_ERROR =
-            "Unexpected error occurred while attempting to reach the database. Details: ";
-    private static final String SUCCESS = "Success...";
+    private static final String TODO_NAME_CANNOT_BE_NULL = "Todo name should not be empty.";
+    private static final String TASK_NAME_CANNOT_BE_NULL = "Task name should not be empty.";
+    private static final String SUCCESS = "Successfully deleted...";
     private static final String UNEXPECTED_ERROR = "An unexpected error occurred while deleting todo.";
 
     @CreateSqlObject
     abstract TodoDao todoDao();
 
+    @CreateSqlObject
+    abstract TasksDao tasksDao();
+
     public List<Todo> getTodos() {
-        return todoDao().getTodos();
+        List<Todo> todoList = todoDao().getTodos();
+        for(Todo todo:todoList)
+        {
+            int id = todo.getId();
+            List<Tasks> tasksList = tasksDao().getTasks(id);
+            for (Tasks task : tasksList)
+                task.setTodo_list_id(id);
+            todo.setTasks(tasksList);
+        }
+        return todoList;
     }
 
     public Todo getTodo(int id) {
         Todo todo = todoDao().getTodo(id);
+        List<Tasks> tasksList= tasksDao().getTasks(id);
+        for(Tasks task:tasksList)
+            task.setTodo_list_id(id);
+        todo.setTasks(tasksList);
         if (Objects.isNull(todo)) {
             throw new WebApplicationException(String.format(TODO_ID_IS_NOT_FOUND, id), Status.NOT_FOUND);
         }
@@ -46,7 +62,20 @@ public abstract class TodoService {
             throw new WebApplicationException(TODO_NAME_CANNOT_BE_NULL, Status.PRECONDITION_FAILED);
         }
         todoDao().createTodo(todo);
-        return todoDao().getTodo(todoDao().lastInsertId());
+        int id = todoDao().lastInsertId();
+        todo.setId(id);
+
+        if (!todo.getTasks().isEmpty()) {
+            List<Tasks> tasksList = todo.getTasks();
+            for (Tasks t : tasksList) {
+                if (Objects.isNull(t.getName())) {
+                    throw new WebApplicationException(TASK_NAME_CANNOT_BE_NULL, Status.PRECONDITION_FAILED);
+                }
+                t.setTodo_list_id(id);
+                tasksDao().createTasks(t);
+            }
+        }
+        return getTodo(id);
     }
 
 
@@ -55,12 +84,16 @@ public abstract class TodoService {
             throw new WebApplicationException(String.format(TODO_ID_IS_NOT_FOUND, todo.getId()),
                     Status.NOT_FOUND);
         }
+        if (Objects.isNull(todo.getName())) {
+            throw new WebApplicationException(TODO_NAME_CANNOT_BE_NULL, Status.PRECONDITION_FAILED);
+        }
         todoDao().editTodo(todo);
-        return todoDao().getTodo(todo.getId());
+        return getTodo(todo.getId());
     }
 
     public String deleteTodo(final int id) {
         int result = todoDao().deleteTodo(id);
+        tasksDao().deleteTasks(id);
         switch (result) {
             case 1:
                 return SUCCESS;
@@ -70,35 +103,6 @@ public abstract class TodoService {
                 throw new WebApplicationException(UNEXPECTED_ERROR, Status.INTERNAL_SERVER_ERROR);
         }
     }
-    /*
-    public String performHealthCheck() {
-        try {
-            todosDao().getTodos();
-        } catch (UnableToObtainConnectionException ex) {
-            return checkUnableToObtainConnectionException(ex);
-        } catch (UnableToExecuteStatementException ex) {
-            return checkUnableToExecuteStatementException(ex);
-        } catch (Exception ex) {
-            return DATABASE_UNEXPECTED_ERROR + ex.getCause().getLocalizedMessage();
-        }
-        return null;
-    }
 
-    private String checkUnableToObtainConnectionException(UnableToObtainConnectionException ex) {
-        if (ex.getCause() instanceof java.sql.SQLNonTransientConnectionException) {
-            return DATABASE_REACH_ERROR + ex.getCause().getLocalizedMessage();
-        } else if (ex.getCause() instanceof java.sql.SQLException) {
-            return DATABASE_CONNECTION_ERROR + ex.getCause().getLocalizedMessage();
-        } else {
-            return DATABASE_UNEXPECTED_ERROR + ex.getCause().getLocalizedMessage();
-        }
-    }
 
-    private String checkUnableToExecuteStatementException(UnableToExecuteStatementException ex) {
-        if (ex.getCause() instanceof java.sql.SQLSyntaxErrorException) {
-            return DATABASE_CONNECTION_ERROR + ex.getCause().getLocalizedMessage();
-        } else {
-            return DATABASE_UNEXPECTED_ERROR + ex.getCause().getLocalizedMessage();
-        }
-    }*/
 }
